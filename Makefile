@@ -8,13 +8,13 @@ classpath = '$(antlrjar):.'
 
 antlr4 = java -cp $(classpath) org.antlr.v4.Tool
 grun = java -cp $(classpath) org.antlr.v4.gui.TestRig
-SRCFILES = main.java
 GENERATED = ccListener.java ccBaseListener.java ccParser.java ccLexer.java
+SRCFILES = main.java
 
 all:
 	make grun
 
-ccLexer.java:	cc.g4
+ccLexer.java: cc.g4
 	$(antlr4) cc.g4
 
 ccLexer.class:	ccLexer.java
@@ -23,7 +23,7 @@ ccLexer.class:	ccLexer.java
 main.class: ccLexer.java main.java
 	javac -cp $(classpath) $(GENERATED) main.java
 
-run:	main.class
+run: main.class
 	java -cp $(classpath) main 01-hello-world.hw
 
 clean:
@@ -32,7 +32,7 @@ clean:
 grun1:	ccLexer.class 01-hello-world.hw
 	$(grun) cc start -gui -tokens 01-hello-world.hw
 
-grun1b:	ccLexer.class 01b-hello-world-withdef.hw
+grun1.2: ccLexer.class 01b-hello-world-withdef.hw
 	$(grun) cc start -gui -tokens 01b-hello-world-withdef.hw
 
 grun2:	ccLexer.class 02-trafiklys-minimal.hw
