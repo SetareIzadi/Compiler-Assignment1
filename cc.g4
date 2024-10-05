@@ -1,39 +1,36 @@
 grammar cc;
 
-////////////// PARSER: ///////////
-
-start : hw* EOF ;
-
-hw : hardware inputs outputs latches? def* updates siminputs ;
-
-hardware : 'hardware' ':' IDENT+ ;
-inputs : 'inputs' ':' signal+ ;
-latches : 'latches' ':' signal* ;
-outputs : 'outputs' ':' signal+ ;
-def : 'def' ':' funk '=' exp ;
-updates : 'updates' ':' (IDENT '=' out)+ ;
-siminputs : 'siminputs' ':' (IDENT '=' NUMBER)+ ;
-
-signal : IDENT ;
-
-funk : IDENT '(' signal ',' signal ',' signal ')'
-     | IDENT '(' signal ',' signal ')'
-     | IDENT ;
-
-out : funk
-    | exp ;
-
-exp : IDENT? '/' exp                     # NOT
-    | exp '*' exp                 # AND
-    | exp '+' exp                 # OR
-    | '(' exp ')'                 # Paren
-    | IDENT+                       # Constant
-    ;
-
-////////////// LEXER: ////////
+// LEXER: //
 
 IDENT  : [a-zA-Z][a-zA-Z0-9']* ;
 NUMBER : [0-9]+ ;
-WHITESPACE : [ \n\t]+ -> skip ;
 COMMENT : '//' ~[\r\n]* -> skip ;
+WHITESPACE : [ \n\t]+ -> skip ;
 LONGCOMMENT : '/*' (~[*] | '*'~[/])* '*/' -> skip ;
+
+// PARSER: //
+start : hw* EOF ;
+hw : hardware inputs outputs latches? definition * update siminputs ;
+
+hardware : 'hardware' ':' IDENT+ ;
+inputs : 'inputs' ':' signal+ ;
+outputs : 'outputs' ':' signal+ ;
+definition : 'definition' ':' function '=' exp ;
+update : 'update' ':' (IDENT '=' out)+ ;
+siminputs : 'siminputs' ':' (IDENT '=' NUMBER)+ ;
+latches : 'latches' ':' signal* ;
+signal : IDENT ;
+
+function : IDENT '(' signal ',' signal ',' signal ')'
+     | IDENT '(' signal ',' signal ')'
+     | IDENT ;
+
+out : function
+    | exp ;
+
+exp : IDENT? '/' exp              # NOT
+    | exp '*' exp                 # AND
+    | '(' exp ')'                 # Paren
+    | IDENT+                      # Constant
+    | exp '+' exp                 # OR
+    ;
