@@ -11,7 +11,7 @@ EQUAL: '=';
 WS: [ \t\r\n]+ -> skip; // Ignore whitespaces
 
 // Parser rules
-circuit: 'hardware:' SIGNAL inputs outputs latches updates siminputs;
+circuit: 'hardware:' SIGNAL inputs outputs latches definitions? updates siminputs;
 
 inputs: 'inputs:' signal_list;
 outputs: 'outputs:' signal_list;
@@ -19,12 +19,20 @@ latches: 'latches:' signal_list;
 
 signal_list: SIGNAL (SIGNAL)*;
 
+definitions: 'def:' def_list;
+def_list: (definition)+;
+definition: SIGNAL '(' SIGNAL (',' SIGNAL)* ')' '=' expr;
+
 updates: 'updates:' update_list;
 update_list: (SIGNAL EQUAL expr)+;
 
-expr: term (OR term)*;
-term: factor (AND factor)*;
-factor: NOT factor | '(' expr ')' | SIGNAL;
+expr: or_expr;
+or_expr: and_expr (OR and_expr)*;
+and_expr: not_expr (AND not_expr)*;
+not_expr: NOT not_expr
+        | '(' expr ')'
+        | SIGNAL
+        | SIGNAL LATCH;
 
 siminputs: 'siminputs:' siminput_list;
-siminput_list: SIGNAL '=' NUMBER;
+siminput_list: (SIGNAL '=' NUMBER)+;

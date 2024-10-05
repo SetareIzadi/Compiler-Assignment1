@@ -4,23 +4,33 @@ antlrjar = antlr-4.13.2-complete.jar
 classpath = '$(antlrjar):.'
 
 ###### FOR WINDOWS -- uncomment the following line if you use Windows:
-#classpath = '$(antlrjar);.'
+# classpath = '$(antlrjar);.'
 
 antlr4 = java -cp $(classpath) org.antlr.v4.Tool
 grun = java -cp $(classpath) org.antlr.v4.gui.TestRig
 SRCFILES = main.java
 GENERATED = ccListener.java ccBaseListener.java ccParser.java ccLexer.java
 
-all:
-	make grun
+# Default target: generate and run the parser
+all: ccLexer.class
 
-ccLexer.java:	cc.g4
-	$(antlr4) cc.g4
+# Run the parser with TestRig
+grun:
+	$(grun) cc circuit -gui
 
-ccLexer.class:	ccLexer.java
+# Generate parser and lexer files from cc.g4
+ccLexer.java: cc.g4
+	$(antlr4) -visitor cc.g4
+
+# Compile the generated files
+ccLexer.class: $(GENERATED)
 	javac -cp $(classpath) $(GENERATED)
 
-# Make clean for Windows
+# Ensure that grun is called only after proper compilation
+run: all
+	make grun
+
+# Clean commands for Windows
 wclean:
 	del /f /q ccParser*
 	del /f /q *.class
@@ -32,7 +42,7 @@ wclean:
 	del /f /q *.iml
 	rd /s /q out\*
 
-# Make clean for Mac and Linux
+# Clean commands for Mac and Linux
 mclean:
 	rm -f ccParser*
 	rm -f *.class
