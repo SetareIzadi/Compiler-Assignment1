@@ -1,32 +1,39 @@
 grammar cc;
 
-// Lexer rules (tokens)
-SIGNAL: [a-zA-Z_][a-zA-Z_0-9]*;
-NUMBER: [0-9]+;
-LATCH: '\'';
-NOT: '/';
-AND: '*';
-OR: '+';
-EQUAL: '=';
-WS: [ \t\r\n]+ -> skip; // Ignore whitespaces
+////////////// PARSER: ///////////
 
-// Parser rules
-circuit: 'hardware:' SIGNAL inputs outputs latches updates siminputs EOF;
+start : hw* EOF ;
 
-inputs: 'inputs:' signal_list;
-outputs: 'outputs:' signal_list;
-latches: 'latches:' signal_list;
+hw : hardware inputs outputs latches? def* updates siminputs ;
 
-signal_list: SIGNAL (SIGNAL)*;
+hardware : 'hardware' ':' IDENT+ ;
+inputs : 'inputs' ':' signal+ ;
+latches : 'latches' ':' signal* ;
+outputs : 'outputs' ':' signal+ ;
+def : 'def' ':' funk '=' exp ;
+updates : 'updates' ':' (IDENT '=' out)+ ;
+siminputs : 'siminputs' ':' (IDENT '=' NUMBER)+ ;
 
-updates: 'updates:' update_list;
-update_list: (SIGNAL EQUAL expr ';')+;
+signal : IDENT ;
 
-expr: term (OR term)*;
-term: factor (AND factor)*;
-factor: NOT factor
-      | '(' expr ')'
-      | SIGNAL;
+funk : IDENT '(' signal ',' signal ',' signal ')'
+     | IDENT '(' signal ',' signal ')'
+     | IDENT ;
 
-siminputs: 'siminputs:' siminput_list;
-siminput_list: SIGNAL EQUAL NUMBER (';' SIGNAL EQUAL NUMBER)*; // Changed separator to ';' to align with example
+out : funk
+    | exp ;
+
+exp : IDENT? '/' exp                     # NOT
+    | exp '*' exp                 # AND
+    | exp '+' exp                 # OR
+    | '(' exp ')'                 # Paren
+    | IDENT+                       # Constant
+    ;
+
+////////////// LEXER: ////////
+
+IDENT  : [a-zA-Z][a-zA-Z0-9']* ;
+NUMBER : [0-9]+ ;
+WHITESPACE : [ \n\t]+ -> skip ;
+COMMENT : '//' ~[\r\n]* -> skip ;
+LONGCOMMENT : '/*' (~[*] | '*'~[/])* '*/' -> skip ;

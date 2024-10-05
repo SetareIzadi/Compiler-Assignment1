@@ -9,24 +9,61 @@ classpath = '$(antlrjar):.'
 antlr4 = java -cp $(classpath) org.antlr.v4.Tool
 grun = java -cp $(classpath) org.antlr.v4.gui.TestRig
 SRCFILES = main.java
-GENERATED = ccListener.java ccBaseListener.java ccParser.java ccLexer.java ccBaseVisitor.java ccVisitor.java
+GENERATED = ccListener.java ccBaseListener.java ccParser.java ccLexer.java
 
-all: run
+all:
+	make grun
 
-ccLexer.java: cc.g4
-	$(antlr4) -visitor cc.g4
+ccLexer.java:	cc.g4
+	$(antlr4) cc.g4
 
-ccLexer.class: ccLexer.java
+ccLexer.class:	ccLexer.java
 	javac -cp $(classpath) $(GENERATED)
 
-grun: ccLexer.class cc.txt
-	$(grun) cc circuit -gui -tokens cc.txt
-
-main.class: ccLexer.class main.java
+main.class: ccLexer.java main.java
 	javac -cp $(classpath) $(GENERATED) main.java
 
-run: main.class
-	java -cp $(classpath) main cc.txt
+run:	main.class
+	java -cp $(classpath) main 01-hello-world.hw
 
 clean:
-	rm -f $(GENERATED) *.class *.interp *.tokens
+	rm $(GENERATED) *.class prog.interp progLexer.interp progLexer.tokens prog.tokens
+
+grun1:	ccLexer.class 01-hello-world.hw
+	$(grun) cc start -gui -tokens 01-hello-world.hw
+
+grun1b:	ccLexer.class 01b-hello-world-withdef.hw
+	$(grun) cc start -gui -tokens 01b-hello-world-withdef.hw
+
+grun2:	ccLexer.class 02-trafiklys-minimal.hw
+	$(grun) cc start -gui -tokens 02-trafiklys-minimal.hw
+
+grun3:	ccLexer.class 03-trafiklys.hw
+	$(grun) cc start -gui -tokens 03-trafiklys.hw
+
+grun4:	ccLexer.class 04-von-Neumann.hw
+	$(grun) cc start -gui -tokens 04-von-Neumann.hw
+
+# Clean commands for Windows
+wclean:
+	del /f /q ccParser*
+	del /f /q *.class
+	del /f /q cc*.java
+	del /f /q *.tokens
+	del /f /q *.interp
+	del /f /q .DS_Store
+	rd /s /q .idea
+	del /f /q *.iml
+	rd /s /q out\*
+
+# Clean commands for Mac and Linux
+mclean:
+	rm -f ccParser*
+	rm -f *.class
+	rm -f cc*.java
+	rm -f *.tokens
+	rm -f *.interp
+	rm -f .DS_Store
+	rm -rf .idea/
+	rm -f *.iml
+	rm -rf out/*
