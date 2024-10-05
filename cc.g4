@@ -29,8 +29,8 @@ out : function
     | exp ;
 
 exp : IDENT? '/' exp              # NOT
-    | exp '*' exp                 # AND
-    | '(' exp ')'                 # Paren
-    | IDENT+                      # Constant
     | exp '+' exp                 # OR
+    | exp '*' exp                 # AND
+    | '(' exp ')'                 # PARENTHESES
+    | IDENT+                      # Constants
     ;
