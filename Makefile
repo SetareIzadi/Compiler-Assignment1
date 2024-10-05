@@ -26,6 +26,9 @@ ccLexer.java: cc.g4
 ccLexer.class: $(GENERATED)
 	javac -cp $(classpath) $(GENERATED)
 
+main.class: ccLexer.java main.java
+	javac -cp $(classpath) $(GENERATED) main.java
+
 # Ensure that grun is called only after proper compilation
 run: all
 	make grun
