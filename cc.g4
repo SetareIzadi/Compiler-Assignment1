@@ -22,11 +22,12 @@ function : IDENT '(' signal (',' signal)* ')' ;
 out : function
     | IDENT ;
 
-exp : '/' e=exp                     # Not
-    | e1=exp op='*' e2=exp          # And
-    | e1=exp op='+' e2=exp          # Or
-    | IDENT                         # Constant
-    | '(' e=exp ')'                 # Paren
+exp : IDENT? '/' exp                # notOperator
+    | e1=exp op='*' e2=exp          # andOperator
+    | e1=exp op='+' e2=exp          # orOperator
+    | '(' e=exp ')'                 # Parentheses
+        | IDENT                     # Constant
+
     ;
 
 
