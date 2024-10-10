@@ -1,47 +1,66 @@
 antlrjar = antlr-4.13.2-complete.jar
 
-###### FOR LINUX AND MAC -- comment the following line if you use Windows:
-classpath = '$(antlrjar):.'
+# For Linux and Mac
+classpath = $(antlrjar):.
 
-###### FOR WINDOWS -- uncomment the following line if you use Windows:
-#classpath = '$(antlrjar);.'
+# For Windows, uncomment this line instead:
+# classpath = $(antlrjar);.
 
 antlr4 = java -cp $(classpath) org.antlr.v4.Tool
 grun = java -cp $(classpath) org.antlr.v4.gui.TestRig
 GENERATED = ccLexer.java ccParser.java ccListener.java ccBaseListener.java ccBaseVisitor.java ccVisitor.java
-SRCFILES = main.java
+SRCFILES = Main.java
+CLASSES = $(GENERATED:.java=.class) $(SRCFILES:.java=.class)
 
-all:
-	make grun
+# Main target to generate, compile, and run everything
+all: run
 
+# Generate lexer and parser using ANTLR
 ccLexer.java: cc.g4
 	$(antlr4) -visitor cc.g4
 
-ccLexer.class: ccLexer.java
-	javac -cp $(classpath) $(GENERATED)
+# Compile Java files
+compile: ccLexer.java $(SRCFILES)
+	javac -cp $(classpath) $(GENERATED) $(SRCFILES)
 
-main.class: ccLexer.java main.java
-	javac -cp $(classpath) $(GENERATED) main.java
+# Run the main class on specific input files
+run: run-helloworld run-helloworld-withdef run-trafiklys-minimal run-trafiklys run-von-neumann
 
-run: main.class
-	java -cp $(classpath) main 01-hello-world.hw
+run-helloworld: compile
+	java -cp $(classpath):. Main 01-hello-world.hw
 
+run-helloworld-withdef: compile
+	java -cp $(classpath):. Main 01b-hello-world-withdef.hw
+
+run-trafiklys-minimal: compile
+	java -cp $(classpath):. Main 02-trafiklys-minimal.hw
+
+run-trafiklys: compile
+	java -cp $(classpath):. Main 03-trafiklys.hw
+
+run-von-neumann: compile
+	java -cp $(classpath):. Main 04-von-Neumann.hw
+
+# Clean generated and compiled files
 clean:
-	rm $(GENERATED) *.class prog.interp progLexer.interp progLexer.tokens prog.tokens
+	rm -f $(GENERATED) *.class cc*.interp ccLexer.tokens cc.tokens ccParser.tokens
 
-grun1:	ccLexer.class 01-hello-world.hw
+# Run grun (TestRig) for graphical parse tree visualization
+grun1: compile
 	$(grun) cc start -gui -tokens 01-hello-world.hw
 
-grun1.2: ccLexer.class 01b-hello-world-withdef.hw
+# Additional rules for grun visualizations as needed...
+
+grun2: compile
 	$(grun) cc start -gui -tokens 01b-hello-world-withdef.hw
 
-grun2:	ccLexer.class 02-trafiklys-minimal.hw
+grun3: compile
 	$(grun) cc start -gui -tokens 02-trafiklys-minimal.hw
 
-grun3:	ccLexer.class 03-trafiklys.hw
+grun4: compile
 	$(grun) cc start -gui -tokens 03-trafiklys.hw
 
-grun4:	ccLexer.class 04-von-Neumann.hw
+grun5: compile
 	$(grun) cc start -gui -tokens 04-von-Neumann.hw
 
 # Clean commands for Windows
