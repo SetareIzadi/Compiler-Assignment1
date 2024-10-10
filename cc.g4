@@ -1,39 +1,38 @@
-
-
 grammar cc;
 
-// PARSER: //
+//Parser
+
 start : circuit* EOF ;
 
-circuit : hardware inputs outputs latches? definition* update siminputs ;
+circuit : hardware  outputs inputs latches? definition* updates siminputs ;
 
-hardware : 'hardware' ':' IDENT ;
+hardware : 'hardware' ':' IDENT+ ;
+latches : 'latches' ':' signal* ;
 inputs : 'inputs' ':' signal+ ;
 outputs : 'outputs' ':' signal+ ;
-latches : 'latches' ':' signal* ;
+updates : 'updates' ':' (IDENT '=' out)+ ;
 definition : 'definition' ':' function '=' exp ;
-update : 'updates' ':' (IDENT '=' out ';')+ ;
 siminputs : 'siminputs' ':' (IDENT '=' NUMBER)+ ;
 
-signal : IDENT ;
+signal : IDENT+ ;
 
-function : IDENT '(' signal (',' signal)* ')' ;
+function : IDENT '(' signal ',' signal ',' signal ')'
+     | IDENT '(' signal ',' signal ')'
+     | IDENT '(' signal')';
 
 out : function
-    | IDENT ;
+    | exp ;
 
-exp : IDENT? '/' exp                # notOperator
-    | e1=exp op='*' e2=exp          # andOperator
-    | e1=exp op='+' e2=exp          # orOperator
-    | '(' e=exp ')'                 # Parentheses
-        | IDENT                     # Constant
-
+exp : IDENT? '/' exp              # NOT
+    | exp '+' exp                 # OR
+    | exp '*' exp                 # AND
+    | '(' exp ')'                 # Parentheses
+    | IDENT+                       # Constant
     ;
 
-
-// LEXER: //
-IDENT : [a-zA-Z][a-zA-Z0-9']* ;
-NUMBER : [0-9]+ ;
+/// Lexer
+IDENT  : [a-zA-Z][a-zA-Z0-9']* ;
+NUMBER: [0-9]+ ;
+WHITESPACE: [ \n\t]+ -> skip ;
 COMMENT : '//' ~[\r\n]* -> skip ;
-WHITESPACE : [ \n\t]+ -> skip ;
-LONGCOMMENT : '/*' (~[*] | '*' ~[/])* '*/' -> skip ;
+BLOCKCOMMENT : '/*' (~[*] | '*'~[/])* '*/' -> skip ;
